@@ -58,8 +58,8 @@ const upload = multer({
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
+    user: process.env.EMAIL_USER || "your-email@gmail.com",
+    pass: process.env.EMAIL_PASSWORD || "your-app-password",
   },
 });
 
@@ -167,7 +167,7 @@ const generateEmailHTML = (formData) => {
 <body>
   <div class="container">
     <div class="header">
-      <h1>New Job Application</h1>
+      <h1>📋 New Job Application</h1>
     </div>
     
     <div class="content">
@@ -216,7 +216,7 @@ const generateEmailHTML = (formData) => {
       </div>
 
       <div class="resume-note">
-        <strong>Resume Attached:</strong> The candidate's CV/Resume is attached to this email.
+        <strong>📎 Resume Attached:</strong> The candidate's CV/Resume is attached to this email.
       </div>
     </div>
     
@@ -230,6 +230,11 @@ const generateEmailHTML = (formData) => {
 </html>
   `;
 };
+
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({ status: "Server is running" });
+});
 
 // API endpoint to handle form submission with file upload
 app.post(
@@ -303,9 +308,6 @@ app.post(
 
       await transporter.sendMail(mailOptions);
 
-      // Delete the file after sending (optional - keep for records if needed)
-      // fs.unlinkSync(req.file.path);
-
       res.json({
         success: true,
         message:
@@ -322,15 +324,8 @@ app.post(
   },
 );
 
-// Health check endpoint
-app.get("/api/health", (req, res) => {
-  res.json({ status: "Server is running" });
-});
-
-// Serve static files from the public directory (built frontend)
 app.use(express.static(path.join(__dirname, "public")));
 
-// Catch-all route to serve index.html for client-side routing
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
